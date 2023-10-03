@@ -1,0 +1,76 @@
+-- Questões
+
+-- Quantos pedidos foram feitos por cada cliente?
+select 
+clients.Fname 'CLIENTE', 
+COUNT(*) 'QTDD_PEDIDOS'
+ 
+from orders	
+inner join productOrder on productOrder.idPOorder = orders.idOrder
+inner join clients on clients.idClient = orders.idClient
+
+GROUP BY clients.Fname;
+
+-- Algum vendedor também é fornecedor?
+select
+*
+from supplier 
+inner join seller on seller.CNPJ = supplier.CNPJ;
+
+-- Relação de produtos fornecedores e estoques / Relação de nomes dos fornecedores e nomes dos produtos;
+
+select 
+supplier.SocialName 'Fornecedor',
+supplier.CNPJ,
+supplier.contact,
+product.Pname 'Produto',
+product.category 'Categoria do Produto',
+product.qnttDisp 'Quantidade disponivel na loja',
+Product_Storage.quant 'Quantidade disponível em estoque',
+pStorage.storageLocation 'Localizacao do estoque'
+
+from productSupplier
+inner join supplier on supplier.idSupplier = productSupplier.idPsSupplier
+inner join product on product.idProduct = productSupplier.idPsProduct
+inner join Product_Storage on Product_Storage.idProduct = productSupplier.idPsProduct
+inner join pStorage on pStorage.idProdStorage = Product_Storage.idProdStorage
+
+ORDER BY supplier.SocialName;
+
+-- Percentual de produtos mais vendindos
+
+select  
+product.Pname,
+CAST((count(productOrder.idPOproduct)/@qtdd := (SELECT COUNT(*) FROM productOrder))*100 as DECIMAL(10,2)) '%'
+
+from productOrder
+INNER JOIN product on product.idProduct = productOrder.idPOproduct
+
+GROUP BY product.Pname
+
+ORDER BY 1
+;
+-- Quantidade de vendas por vendedor
+
+select 
+seller.SocialName,
+COUNT(*) 'Qtdd_vendas'
+
+from orders
+inner join seller on seller.idSeller = orders.idSeller
+
+GROUP BY seller.SocialName
+
+ORDER BY 1;
+
+-- vendedores que venderam mais de 1 item
+select 
+seller.SocialName,
+COUNT(*) 'Qtdd_vendas'
+
+from orders
+inner join seller on seller.idSeller = orders.idSeller
+
+GROUP BY seller.SocialName
+
+having COUNT(*) > 1
